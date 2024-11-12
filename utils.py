@@ -15,6 +15,19 @@ def recv_all(sock):
     return res
 
 '''
+Recieve and return all availible message from a given socket.
+Our protocol enforces that messages end with the $STOP$ sequence.
+Return value is a string representing the decoded availible message and a flag noting if the msg finished.
+'''
+def recv_chunk(sock):
+    is_message_complete = False 
+    fragment = sock.recv(10000) #Arbitrary fragment size
+    fragment = fragment.decode('utf-8')
+    if(fragment[:-6] == "$STOP$"):
+        is_message_complete = True
+    return fragment, is_message_complete
+        
+'''
 Send a message (str) over a given socket
 '''
 def send_all(sock, message):
