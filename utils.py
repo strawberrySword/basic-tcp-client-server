@@ -47,6 +47,6 @@ def execute_command(command):
 class Client: 
     def __init__(self, socket):
         self.socket = socket
-        self.last_received = ""
+        self.message = ""
         self.pending_output = ""
         self.user_name = ""
