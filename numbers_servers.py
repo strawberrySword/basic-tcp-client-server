@@ -1,22 +1,17 @@
 import socket
 import select
+import panda as pd
 
 FILE_PATH= "users_file"
 HOST_NAME = ""
 PORT = "1337"
 
 def load_users_from_file(file_path):
-    users = {}
-    users_file = open(FILE_PATH, "r")
-    for user in users_file:
-        # TODO : check how to split by tab and not double spaces
-        user = user.split("  ")
-        users[user[0]] = user[1]
-    return users
+    return pd.read_csv(FILE_PATH, sep='\t', header=None, names=['username', 'password'])
 
 if __name__=="__main__":
     users = load_users_from_file(FILE_PATH)
-
+    print(users)
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock.bind((HOST_NAME, PORT))
     server_sock.listen(5)
