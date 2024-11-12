@@ -32,7 +32,7 @@ def execute_command(command):
     params = command.split(':')
 
     if params[0] == "calculate":
-        return evaluate_exp(params[1].lstrip().rstrip().split(' '))
+        return evaluate_exp(params[1].lstrip().rstrip())
     elif params[0] == "max":
         return f'the maximum is {max(params[1].lstrip().rstrip().split(' '))}'
     elif params[0] == "factors":
