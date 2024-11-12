@@ -23,3 +23,10 @@ def send_all(sock, message):
         message = message[sent:] #Remove sent part from message
 
     sock.send(b'$STOP$') #Send end of message
+    
+class Client: 
+    def __init__(self, socket):
+        self.socket = socket
+        self.last_received = ""
+        self.pending_output = ""
+        self.user_name = ""

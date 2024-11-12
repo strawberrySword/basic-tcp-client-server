@@ -1,6 +1,7 @@
 import socket
 import select
 import pandas as pd
+from utils.py import recv_all, send_all, Client
 
 FILE_PATH= "users_file"
 HOST_NAME = ""
@@ -15,11 +16,8 @@ if __name__=="__main__":
     server_sock.bind((HOST_NAME, PORT))
     server_sock.listen(5)
 
+    clients = []
     inputs = [server_sock]
-
-    queued_clients = []
-    pending_welcome = []
-    pending_reject = []
     outputs = []
 
     running = True
@@ -32,13 +30,14 @@ if __name__=="__main__":
             break
         for s in inputready:
             if s == server_sock:
-                client = s.accept()
-                inputs.append(client)
+                client_socket = s.accept()
+                inputs.append(client_socket)
+                clients.append(Client(client_socket))
             else:
-                # read login detalis
-                # check if user legit
-                # if legit add s to pending welcome
-                # else add the s to pending reject
+                message = recv_all(s)
+                client = [x for x in clients if x.socket == s].pop()
+                if(client.user_name == ""):
+                    
                 outputs.append(s)
         for s in outputready:
             if s in pending_reject:
