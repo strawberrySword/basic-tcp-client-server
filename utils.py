@@ -66,6 +66,6 @@ def evaluate_exp(expression):
 class Client: 
     def __init__(self, socket):
         self.socket = socket
-        self.last_received = ""
+        self.message = ""
         self.pending_output = ""
         self.user_name = ""
