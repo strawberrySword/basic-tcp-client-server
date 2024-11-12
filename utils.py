@@ -27,6 +27,7 @@ def send_all(sock, message):
 
 '''
 Gets a string that represents a command call (ex: "calculate: 2*5")
+Returns the server's answer to the query given by the user
 '''
 def execute_command(command):
     params = command.split(':')
@@ -36,7 +37,7 @@ def execute_command(command):
     elif params[0] == "max":
         return f'the maximum is {max(params[1].lstrip().rstrip().split(' '))}'
     elif params[0] == "factors":
-        return f'the prime factors of {params[1]} are: {[i for i in range(1, int(params[1])+1) if int(params[1]) % i == 0].join(' ')}'
+        return f'the prime factors of {params[1].lstrip().rstrip()} are: {",".join(prime_decomposition(int(params[1])))}'
     else:
         return
 
@@ -62,6 +63,11 @@ def evaluate_exp(expression):
 
     return f'response: {res}.'
 
+'''
+Returns all prime factors of a given number
+'''
+def prime_decomposition(x):
+    return [str(i) for i in range(2, x+1) if x % i == 0 and all(i % j != 0 for j in range(2, i))]
 
 class Client: 
     def __init__(self, socket):
