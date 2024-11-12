@@ -34,7 +34,6 @@ class Server:
         
             for s in inputready:
                 client = None
-                result=""
                 if s == self.server_socket:
                     client = self.accept_new_client()
                 else:
@@ -50,8 +49,7 @@ class Server:
                         user_name, password = parse_login_info(client.message)
                         self.client_login(user_name, password, client)
                     else: 
-                        result = execute_command(client.message)    
-                        client.pending_output = result
+                        client.pending_output = execute_command(client.message)    
                 self.write_sockets.append(client.socket)
             for s in outputready:
                 client = [x for x in self.clients if x.socket == s].pop()
