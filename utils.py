@@ -24,6 +24,26 @@ def send_all(sock, message):
 
     sock.send(b'$STOP$') #Send end of message
     
+
+'''
+Gets a string that represents a command call (ex: "calculate: 2*5")
+'''
+def execute_command(command):
+    pass
+
+    params = command.split(':')
+
+    if params[0] == "calculate":
+        pass
+    elif params[0] == "max":
+        pass
+    elif params[0] == "factors":
+        pass
+    else:
+        return
+
+
+
 class Client: 
     def __init__(self, socket):
         self.socket = socket
