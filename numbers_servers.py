@@ -10,6 +10,9 @@ PORT = 1337
 def load_users_from_file(file_path):
     return pd.read_table(FILE_PATH, sep='\t', names=['username', 'password'])
 
+def parse_login_info(message): 
+    return message.split(" ")[0], message.split(" ")[1] 
+
 if __name__=="__main__":
     users = load_users_from_file(FILE_PATH)
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,15 +40,18 @@ if __name__=="__main__":
                 message = recv_all(s)
                 client = [x for x in clients if x.socket == s].pop()
                 if(client.user_name == ""):
-                    
+                    user_name, password = parse_login_info(message)
+                    if(users[users["username"] == user_name]["password"] == password):
+                        client.pending_output = f"Hi {user_name}, good to see you."
+                    else: 
+                        client.pending_output = "Failed to login."
+                else: 
+                    #parse command
+                    client.pending_output = "place holder"
                 outputs.append(s)
         for s in outputready:
-            if s in pending_reject:
-                #send reject message
-                pending_reject.remove(s)
-            elif s in pending_welcome:
-                #send welcome message
-                pending_welcome.remove(s)
+            client = [x for x in clients if x.socket == s].pop()
+            send_all(s, client.pending_output)
 
 
     
