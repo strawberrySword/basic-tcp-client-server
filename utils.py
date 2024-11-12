@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 '''
-Read and return an entire message from a given socket
-Our protocol enforces that messages end with the $STOP$ sequence
+Recieve and return an entire message from a given socket.
+Our protocol enforces that messages end with the $STOP$ sequence.
+Return value is a string representing the decoded.
 '''
-def send_all(sock):
+def recv_all(sock):
     res = ''
     
     while res[-6:] != "$STOP$":
@@ -13,10 +14,12 @@ def send_all(sock):
     
     return res
 
-#Same for write (copy annotation from above)
-def recv_all(sock, message):
+'''
+Send a message (str) over a given socket
+'''
+def send_all(sock, message):
     while len(message) > 0:
-        sent = sock.send(len(message))
+        sent = sock.send(message.encode())
         message = message[sent:] #Remove sent part from message
 
     sock.send(b'$STOP$') #Send end of message
