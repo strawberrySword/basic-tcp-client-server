@@ -50,50 +50,68 @@ def send_all(sock, message):
     msg = struct.pack(">II", len(message.encode('utf-8'))) + message
     sock.sendall(msg) # temporary blocking solution
     
-
-'''
-Gets a string that represents a command call (ex: "calculate: 2*5")
-Returns the server's answer to the query given by the user
-'''
 def execute_command(command):
     params = command.split(':')
-
+    if len(params) == 1:
+        return "Incorrect command format, has to include \":\""
+    
     if params[0] == "calculate":
-        return evaluate_exp(params[1].lstrip().rstrip())
+        return evaluate_exp(params[1].strip())
     elif params[0] == "max":
-        return f'the maximum is {max(params[1].lstrip().rstrip().split(' '))}'
+        if params[1].lstrip()[0] == '(' and params[1].rstrip()[-1] == ')':
+            return f'the maximum is {max(params[1].strip()[1:-1].strip().split(' '))}'
+        else:
+            return f'max function has to include parameters with braces around them'
     elif params[0] == "factors":
-        return f'the prime factors of {params[1].lstrip().rstrip()} are: {",".join(prime_decomposition(int(params[1])))}'
+        return f'the prime factors of {params[1].strip()} are: {",".join(prime_decomposition(int(params[1])))}'
     else:
-        return
+        return f'Command {params[0]} does not exist'
 
 
 '''
 Evaluates an expression of the form X Y Z, where Y is an operator, X Z are signed ints
 '''
 def evaluate_exp(expression):
+    def checkInt32(a):
+        INT32_MIN = -2**31      # -2,147,483,648
+        INT32_MAX = 2**31 - 1   #  2,147,483,647
+
+        return INT32_MIN <= a and a <= INT32_MAX
+     
     parts = expression.split(' ')
+    if len(parts) != 3:
+        return f'Incorrect format for calculate function'
+    
     x = int(parts[0])
     z = int(parts[2])
 
     if parts[1] == '+':
-        res = str(x+z)
+        if not(checkInt32(x+z)): return f'error: result is too big'
+        res = x+z
     elif parts[1] == '-':
-        res = str(x-z)
+        if not(checkInt32(x-z)): return f'error: result is too big'
+        res = x-z
     elif parts[1] == '*':
-        res = str(x*z)
+        if not(checkInt32(x*z)): return f'error: result is too big'
+        res = x*z
     elif parts[1] == '/':
-        res = str(x/z)
+        if not(checkInt32(x/z)): return f'error: result is too big'
+        return f'response: {x/z:.2f}.'
     elif parts[1] == '^':
-        res = str(x**z)
+        if not(checkInt32(x**z)): return f'error: result is too big'
+        res = x**z
+    else:
+        return f'Error: Operator {parts[1]} not supported'
 
     return f'response: {res}.'
+
 
 '''
 Returns all prime factors of a given number
 '''
 def prime_decomposition(x):
     return [str(i) for i in range(2, x+1) if x % i == 0 and all(i % j != 0 for j in range(2, i))]
+
 
 class Client: 
     def __init__(self, socket):
