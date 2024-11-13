@@ -47,7 +47,7 @@ def recvall(sock, n):
 Send a message (str) over a given socket
 '''
 def send_all(sock, message):
-    msg = struct.pack(">II", len(message.encode('utf-8'))) + message
+    msg = struct.pack(">I", len(message.encode('utf-8'))) + message.encode('utf-8')
     sock.sendall(msg) # temporary blocking solution
     
 def execute_command(command):
