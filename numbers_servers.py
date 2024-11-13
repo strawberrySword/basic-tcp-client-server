@@ -39,7 +39,6 @@ class Server:
                     client = self.accept_new_client()
                 else:
                     client = [x for x in self.clients if x.socket == s].pop()       
-                    print(client.user_name)
                     is_msg_complete = recv_chunk(s, client)
                     
                     if not is_msg_complete:
@@ -48,7 +47,6 @@ class Server:
                     if client.user_name == "":
                         user_name, password = parse_login_info(client.message)
                         self.client_login(user_name, password, client)
-                        print(client)
                     else: 
                         client.pending_output = execute_command(client.message)
                 client.message = ""
