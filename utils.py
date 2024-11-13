@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import struct
 '''
 Recieve and return an entire message from a given socket.
 Our protocol enforces that messages end with the $STOP$ sequence.
@@ -19,23 +19,36 @@ Recieve and return all availible message from a given socket.
 Our protocol enforces that messages end with the $STOP$ sequence.
 Return value is a string representing the decoded availible message and a flag noting if the msg finished.
 '''
-def recv_chunk(sock):
-    is_message_complete = False 
-    fragment = sock.recv(10000) #Arbitrary fragment size
-    fragment = fragment.decode('utf-8')
-    if(fragment[:-6] == "$STOP$"):
-        is_message_complete = True
-    return fragment, is_message_complete
+def recv_chunk(sock, client):
+    if(client.msg_len == 0): #new message 
+        raw_msglen = recvall(sock, 4) # this is potentially blocking but only if int is passed through many packets which is unlikley
+        if not raw_msglen:
+            return None
+        client.msg_len = struct.unpack('>I', raw_msglen)[0]
+        client.remaining_msg = client.msg_len
+    packet = sock.recv(client.remaining_msg)
+    client.remaining_msg -= len(packet)
+    client.message += packet.decode('utf-8')
+    return client.remaining_msg == 0
+    
+    
+
+def recvall(sock, n):
+    # Helper function to recv n bytes or return None if EOF is hit
+    data = bytearray()
+    while len(data) < n:
+        packet = sock.recv(n - len(data))
+        if not packet:
+            return None
+        data.extend(packet)
+    return data
         
 '''
 Send a message (str) over a given socket
 '''
 def send_all(sock, message):
-    while len(message) > 0:
-        sent = sock.send(message.encode())
-        message = message[sent:] #Remove sent part from message
-
-    sock.send(b'$STOP$') #Send end of message
+    msg = struct.pack(">II", len(message.encode('utf-8'))) + message
+    sock.sendall(msg) # temporary blocking solution
     
 
 '''
@@ -88,3 +101,5 @@ class Client:
         self.message = ""
         self.pending_output = ""
         self.user_name = ""
+        self.msg_len = 0
+        self.remaining_msg = 0 

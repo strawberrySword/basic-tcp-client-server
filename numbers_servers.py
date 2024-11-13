@@ -22,7 +22,6 @@ class Server:
         self.write_sockets = []
     
     def run(self):
-        print(self.read_sockets)
         running = True
         while running:
             try:
@@ -39,17 +38,19 @@ class Server:
                 else:
                     client = [x for x in self.clients if x.socket == s].pop()       
                 
-                    msg, is_msg_complete = recv_chunk(s)
+                    is_msg_complete = recv_chunk(s, client)
                     
                     if not is_msg_complete:
-                        client.message += msg
                         continue
                     
                     if client.user_name == "":
                         user_name, password = parse_login_info(client.message)
                         self.client_login(user_name, password, client)
                     else: 
-                        client.pending_output = execute_command(client.message)    
+                        client.pending_output = execute_command(client.message)
+                client.message = ""
+                client.msg_len = 0
+                client.remaining_msg = 0    
                 self.write_sockets.append(client.socket)
             for s in outputready:
                 client = [x for x in self.clients if x.socket == s].pop()
