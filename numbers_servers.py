@@ -37,7 +37,7 @@ class Server:
                     client = self.accept_new_client()
                 else:
                     client = [x for x in self.clients if x.socket == s].pop()       
-                
+                    print(client.user_name)
                     is_msg_complete = recv_chunk(s, client)
                     
                     if not is_msg_complete:
@@ -46,6 +46,7 @@ class Server:
                     if client.user_name == "":
                         user_name, password = parse_login_info(client.message)
                         self.client_login(user_name, password, client)
+                        print(client)
                     else: 
                         client.pending_output = execute_command(client.message)
                 client.message = ""
@@ -58,10 +59,13 @@ class Server:
                 self.write_sockets.remove(s)
         
     def load_users_from_file(self, file_path):
-        self.users = pd.read_table(file_path, sep='\t', names=['username', 'password'])
+        self.users = pd.read_csv(file_path, sep='\t', names=['username', 'password'], dtype={
+            'username': 'string',
+            'password': 'string'
+            })
     
     def accept_new_client(self):
-        client_socket = self.server_socket.accept()
+        client_socket, _ = self.server_socket.accept()
         self.read_sockets.append(client_socket)
         client = Client(client_socket)
         client.pending_output = "hey hey hey"
@@ -69,11 +73,13 @@ class Server:
         return client
     
     def client_login(self, user_name, password, client):
-        if(self.users[self.users["username"] == user_name]["password"] == password):
-            client.username = user_name
+        if(self.users.loc[self.users['username'] == user_name, 'password'].iloc[0] == password):
+            client.user_name = user_name
             client.pending_output = f"Hi {user_name}, good to see you."
+            print(f"Hi {user_name}, good to see you.")
         else: 
             client.pending_output = "Failed to login."
+            print("Failed to login.")
             
 if __name__=="__main__":
     server = Server(HOST_NAME, PORT)

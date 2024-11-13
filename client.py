@@ -12,14 +12,13 @@ def main():
 
     conn.connect((host,port))
 
-    recv_all(conn) #Get welcome message
-
+    print(conn.recv(10000)) #Get welcome message
     user = input()[5:].strip()
     password = input()[9:].strip()
     send_all(conn ,user+' '+password)
 
 
-    if recv_all(conn) == 'Failed to login.':
+    if conn.recv(10000) == 'Failed to login.':
         print("Please retry logging in:")
         user = input()[5:].strip()
         password = input()[9:].strip()
