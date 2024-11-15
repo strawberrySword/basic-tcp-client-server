@@ -39,7 +39,7 @@ class Server:
                     client = self.accept_new_client()
                 else:
                     client = [x for x in self.clients if x.socket == s].pop()       
-                    is_msg_complete = recv_chunk(s, client)
+                    is_msg_complete = recv_chunk(client)
                     
                     if not is_msg_complete:
                         continue
@@ -55,7 +55,7 @@ class Server:
                 self.write_sockets.append(client.socket)
             for s in outputready:
                 client = [x for x in self.clients if x.socket == s].pop()
-                send_all(s, client.pending_output)
+                send_chunk(client)
                 self.write_sockets.remove(s)
         
     def load_users_from_file(self, file_path):
