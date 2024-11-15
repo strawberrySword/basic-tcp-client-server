@@ -1,18 +1,5 @@
 #!/usr/bin/env python3
 import struct
-'''
-Recieve and return an entire message from a given socket.
-Our protocol enforces that messages end with the $STOP$ sequence.
-Return value is a string representing the decoded.
-'''
-def recv_all(sock):
-    res = ''
-    
-    while res[-6:] != "$STOP$":
-        fragment = sock.recv(100) #Arbitrary fragment size
-        res += fragment.decode('utf-8')
-    
-    return res
 
 '''
 Recieve and return all availible message from a given socket.
@@ -37,7 +24,7 @@ def send_chunk(client):
         client.amount_sent += 1
     sent = client.socket.send(client.pending_output[client.amount_sent-1:].encode('utf-8'))
     client.amount_sent += sent
-    ret =  client.amount_sent == len(client.pending_output.encode())+1
+    ret =  (client.amount_sent == len(client.pending_output.encode())+1)
     if ret:
         client.amount_sent = 0
         client.pending_output = ""
