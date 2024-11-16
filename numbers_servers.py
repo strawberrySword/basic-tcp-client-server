@@ -68,7 +68,7 @@ class Server:
         client_socket, _ = self.server_socket.accept()
         self.read_sockets.append(client_socket)
         client = Client(client_socket)
-        client.pending_output = "hey hey hey"
+        # client.pending_output = "hey hey hey"
         self.clients.append(client)
         return client
     
