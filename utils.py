@@ -30,8 +30,6 @@ def recv_chunk(sock, client):
     client.remaining_msg -= len(packet)
     client.message += packet.decode('utf-8')
     return client.remaining_msg == 0
-    
-    
 
 def recvall(sock, n):
     # Helper function to recv n bytes or return None if EOF is hit
