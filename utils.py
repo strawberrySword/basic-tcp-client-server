@@ -1,35 +1,38 @@
 #!/usr/bin/env python3
 import struct
-'''
-Recieve and return an entire message from a given socket.
-Our protocol enforces that messages end with the $STOP$ sequence.
-Return value is a string representing the decoded.
-'''
-def recv_all(sock):
-    res = ''
-    
-    while res[-6:] != "$STOP$":
-        fragment = sock.recv(100) #Arbitrary fragment size
-        res += fragment.decode('utf-8')
-    
-    return res
 
 '''
 Recieve and return all availible message from a given socket.
 Our protocol enforces that messages end with the $STOP$ sequence.
 Return value is a string representing the decoded availible message and a flag noting if the msg finished.
 '''
-def recv_chunk(sock, client):
+def recv_chunk(client):
     if(client.msg_len == 0): #new message 
-        raw_msglen = recvall(sock, 4) # this is potentially blocking but only if int is passed through many packets which is unlikley
+        raw_msglen = recvall(client.socket, 4) # this is potentially blocking but only if int is passed through many packets which is unlikley
         if not raw_msglen:
             return None
         client.msg_len = struct.unpack('>I', raw_msglen)[0]
         client.remaining_msg = client.msg_len
-    packet = sock.recv(client.remaining_msg)
+    packet = client.socket.recv(client.remaining_msg)
     client.remaining_msg -= len(packet)
     client.message += packet.decode('utf-8')
     return client.remaining_msg == 0
+    
+def send_chunk(client):
+    if client.amount_sent == 0:
+        client.socket.sendall(struct.pack(">I", len(client.pending_output.encode('utf-8'))))
+        client.amount_sent += 1
+    sent = client.socket.send(client.pending_output[client.amount_sent-1:].encode('utf-8'))
+    client.amount_sent += sent
+    ret =  (client.amount_sent == len(client.pending_output.encode())+1)
+    if ret:
+        client.amount_sent = 0
+        client.pending_output = ""
+
+    return ret
+    
+    
+    
 
 def recvall(sock, n):
     # Helper function to recv n bytes or return None if EOF is hit
@@ -40,7 +43,7 @@ def recvall(sock, n):
             return None
         data.extend(packet)
     return data
-        
+     
 '''
 Send a message (str) over a given socket
 '''
@@ -116,6 +119,7 @@ class Client:
         self.socket = socket
         self.message = ""
         self.pending_output = ""
+        self.amount_sent = 0
         self.user_name = ""
         self.msg_len = 0
         self.remaining_msg = 0 
