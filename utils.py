@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 import struct
 
-'''
-Recieve and return all availible message from a given socket.
-Our protocol enforces that messages end with the $STOP$ sequence.
-Return value is a string representing the decoded availible message and a flag noting if the msg finished.
-'''
+#A server-side function, recieves a fragment from a read-ready socket
 def recv_chunk(client):
     if(client.msg_len == 0): #new message 
         raw_msglen = recvall(client.socket, 4) # this is potentially blocking but only if int is passed through many packets which is unlikley
@@ -18,6 +14,7 @@ def recv_chunk(client):
     client.message += packet.decode('utf-8')
     return client.remaining_msg == 0
     
+#A server-side function, sends a fragment to a write ready socket
 def send_chunk(client):
     if client.amount_sent == 0:
         client.socket.sendall(struct.pack(">I", len(client.pending_output.encode('utf-8'))))
@@ -33,9 +30,9 @@ def send_chunk(client):
     
     
     
-
+#Client-side function, blocking recieve until recieved n bytes
+#Returns None on error
 def recvall(sock, n):
-    # Helper function to recv n bytes or return None if EOF is hit
     data = bytearray()
     while len(data) < n:
         packet = sock.recv(n - len(data))
@@ -43,14 +40,22 @@ def recvall(sock, n):
             return None
         data.extend(packet)
     return data
-     
-'''
-Send a message (str) over a given socket
-'''
-def send_all(sock, message):
+
+#Cliend-side function, blocking send until whole message is sent.
+#Note the use of our application protocol: message length at start
+def sendall(sock, message):
     msg = struct.pack(">I", len(message.encode('utf-8'))) + message.encode('utf-8')
-    sock.sendall(msg) # temporary blocking solution
-    
+
+    sent = 0
+    while sent < len(msg):
+        packet = sock.send(msg[sent:])
+        if(packet == 0):
+            return None
+        sent += packet
+
+
+
+#Server-side command execution
 def execute_command(command):
     params = command.split(':')
     if len(params) == 1:
@@ -68,10 +73,7 @@ def execute_command(command):
     else:
         return f'Command {params[0]} does not exist'
 
-
-'''
-Evaluates an expression of the form X Y Z, where Y is an operator, X Z are signed ints
-'''
+#Helper for execute_command(...)
 def evaluate_exp(expression):
     def checkInt32(a):
         INT32_MIN = -2**31      # -2,147,483,648
@@ -106,20 +108,21 @@ def evaluate_exp(expression):
 
     return f'response: {res}.'
 
-
-'''
-Returns all prime factors of a given number
-'''
+#Helper for execute_command(...)
 def prime_decomposition(x):
     return [str(i) for i in range(2, x+1) if x % i == 0 and all(i % j != 0 for j in range(2, i))]
 
 
+
+#Server-side representation of a client
 class Client: 
     def __init__(self, socket):
         self.socket = socket
-        self.message = ""
-        self.pending_output = ""
-        self.amount_sent = 0
         self.user_name = ""
-        self.msg_len = 0
+        self.message = "" #Message recieved from client
+        self.msg_len = 0 #Length is recieved before message and should be stored to ensure we get the entire message
+        self.pending_output = "" #Message to be sent to client
+
+        #Keeping track of sent/recieved fragments
         self.remaining_msg = 0 
+        self.amount_sent = 0
