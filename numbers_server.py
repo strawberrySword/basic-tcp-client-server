@@ -60,7 +60,7 @@ class Server:
                 self.write_sockets.append(client.socket)
         
     def load_users_from_file(self, file_path):
-        self.users = pd.read_csv(file_path, sep='\t', names=['username', 'password'], dtype={
+        self.users = pd.read_csv(file_path, sep=r'\s+', names=['username', 'password'],dtype={
             'username': 'string',
             'password': 'string'
             })
@@ -69,12 +69,12 @@ class Server:
         client_socket, _ = self.server_socket.accept()
         self.read_sockets.append(client_socket)
         client = Client(client_socket)
-        # client.pending_output = "hey hey hey"
+        client.pending_output = "Welcome! Please log in."
         self.clients.append(client)
         return client
     
     def client_login(self, user_name, password, client):
-        if(self.users.loc[self.users['username'] == user_name, 'password'].iloc[0] == password):
+        if(user_name in self.users['username'].values and self.users.loc[self.users['username'] == user_name, 'password'].iloc[0] == password):
             client.user_name = user_name
             client.pending_output = f"Hi {user_name}, good to see you."
             print(f"Hi {user_name}, good to see you.")
@@ -83,6 +83,9 @@ class Server:
             print("Failed to login.")
             
 if __name__=="__main__":
+    if len(sys.argv) > 1: #Port given
+        PORT = int(sys.argv[1])
+
     server = Server(HOST_NAME, PORT)
     
     server.load_users_from_file(FILE_PATH)
