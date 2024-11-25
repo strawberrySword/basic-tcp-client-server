@@ -20,7 +20,7 @@ def main():
     #Insert login credentials: login is assumed to be in the specified format. Otherwise, the sent credentials will be truncated
     user = input()[5:].strip()
     password = input()[9:].strip()
-    send_all(conn ,user+' '+password)
+    sendall(conn ,user+' '+password)
 
     #Recieve login success/failure
     resp = recvall(conn, struct.unpack('>I', recvall(conn,4))[0]).decode('utf-8')
@@ -31,7 +31,7 @@ def main():
         print("Please try logging in again:")
         user = input()[5:].strip()
         password = input()[9:].strip()
-        send_all(conn, user+' '+password)
+        sendall(conn, user+' '+password)
 
         resp = recvall(conn, struct.unpack('>I', recvall(conn,4))[0]).decode('utf-8')
         print(resp)
@@ -39,7 +39,7 @@ def main():
     #Send commands and get server's response
     usr_in = input()
     while(usr_in != 'quit'):
-        send_all(conn, usr_in)
+        sendall(conn, usr_in)
         print(recvall(conn, struct.unpack('>I', recvall(conn,4))[0]).decode('utf-8'))
         usr_in = input()
 
