@@ -60,7 +60,7 @@ def execute_command(command):
         return evaluate_exp(params[1].strip())
     elif params[0] == "max":
         if params[1].lstrip()[0] == '(' and params[1].rstrip()[-1] == ')':
-            return f'the maximum is {max(params[1].strip()[1:-1].strip().split(' '))}'
+            return f'the maximum is {max(list(map(int, params[1].strip()[1:-1].strip().split(' '))))}'
         else:
             return f'max function has to include parameters with braces around them'
     elif params[0] == "factors":
