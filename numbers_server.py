@@ -33,7 +33,12 @@ class Server:
             except socket.error as e:
                 self.server_socket.close()
         
-            for s in inputready:
+            for s in outputready:
+                client = [x for x in self.clients if x.socket == s].pop()
+                is_msg_complete = send_chunk(client)
+                if is_msg_complete:
+                    self.write_sockets.remove(s)
+            for s in [s for s in inputready if s not in outputready]:
                 client = None
                 if s == self.server_socket:
                     client = self.accept_new_client()
@@ -53,10 +58,6 @@ class Server:
                 client.msg_len = 0
                 client.remaining_msg = 0    
                 self.write_sockets.append(client.socket)
-            for s in outputready:
-                client = [x for x in self.clients if x.socket == s].pop()
-                send_chunk(client)
-                self.write_sockets.remove(s)
         
     def load_users_from_file(self, file_path):
         self.users = pd.read_csv(file_path, sep='\t', names=['username', 'password'], dtype={
