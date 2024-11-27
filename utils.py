@@ -65,13 +65,13 @@ def execute_command(command):
         return evaluate_exp(params[1].strip())
     elif params[0] == "max":
         if params[1].lstrip()[0] == '(' and params[1].rstrip()[-1] == ')':
-            return f'the maximum is {max(list(map(int, params[1].strip()[1:-1].strip().split(' '))))}'
+            return 'the maximum is {0}'.format(max(list(map(int, params[1].strip()[1:-1].strip().split(' ')))))
         else:
-            return f'max function has to include parameters with braces around them'
+            return 'max function has to include parameters with braces around them'
     elif params[0] == "factors":
-        return f'the prime factors of {params[1].strip()} are: {",".join(prime_decomposition(int(params[1])))}'
+        return 'the prime factors of {0} are: {1}'.format(params[1].strip(), ",".join(prime_decomposition(int(params[1]))))
     else:
-        return f'Command {params[0]} does not exist'
+        return 'Command {0} does not exist'.format(params[0])
 
 #Helper for execute_command(...)
 def evaluate_exp(expression):
@@ -83,30 +83,30 @@ def evaluate_exp(expression):
      
     parts = expression.split(' ')
     if len(parts) != 3:
-        return f'Incorrect format for calculate function'
+        return 'Incorrect format for calculate function'
     
     x = int(parts[0])
     z = int(parts[2])
 
     if parts[1] == '+':
-        if not(checkInt32(x+z)): return f'error: result is too big'
+        if not(checkInt32(x+z)): return 'error: result is too big'
         res = x+z
     elif parts[1] == '-':
-        if not(checkInt32(x-z)): return f'error: result is too big'
+        if not(checkInt32(x-z)): return 'error: result is too big'
         res = x-z
     elif parts[1] == '*':
-        if not(checkInt32(x*z)): return f'error: result is too big'
+        if not(checkInt32(x*z)): return 'error: result is too big'
         res = x*z
     elif parts[1] == '/':
-        if not(checkInt32(x/z)): return f'error: result is too big'
-        return f'response: {x/z:.2f}.'
+        if not(checkInt32(x/z)): return 'error: result is too big'
+        return 'response: {0:.2f}.'.format(x/z)
     elif parts[1] == '^':
-        if not(checkInt32(x**z)): return f'error: result is too big'
+        if not(checkInt32(x**z)): return 'error: result is too big'
         res = x**z
     else:
-        return f'Error: Operator {parts[1]} not supported'
+        return 'Error: Operator {0} not supported'.format(parts[1])
 
-    return f'response: {res}.'
+    return 'response: {0}.'.format(res)
 
 #Helper for execute_command(...)
 def prime_decomposition(x):

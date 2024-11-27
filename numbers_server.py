@@ -76,8 +76,8 @@ class Server:
     def client_login(self, user_name, password, client):
         if(user_name in self.users['username'].values and self.users.loc[self.users['username'] == user_name, 'password'].iloc[0] == password):
             client.user_name = user_name
-            client.pending_output = f"Hi {user_name}, good to see you."
-            print(f"Hi {user_name}, good to see you.")
+            client.pending_output = "Hi {0}, good to see you.".format(user_name)
+            print("Hi {0}, good to see you.".format(user_name))
         else: 
             client.pending_output = "Failed to login."
             print("Failed to login.")
