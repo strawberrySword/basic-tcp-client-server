@@ -6,7 +6,7 @@ import pandas as pd
 from utils import *
 import sys
 
-FILE_PATH= "users_file"
+FILE_PATH= ""
 HOST_NAME = ""
 PORT = 1337
 
@@ -60,7 +60,7 @@ class Server:
                 self.write_sockets.append(client.socket)
         
     def load_users_from_file(self, file_path):
-        self.users = pd.read_csv(file_path, sep=r'\s+', names=['username', 'password'],dtype={
+        self.users = pd.read_csv(file_path, sep='\t', names=['username', 'password'],dtype={
             'username': 'string',
             'password': 'string'
             })
@@ -83,8 +83,10 @@ class Server:
             print("Failed to login.")
             
 if __name__=="__main__":
-    if len(sys.argv) > 1: #Port given
-        PORT = int(sys.argv[1])
+    FILE_PATH = sys.argv[1]
+
+    if len(sys.argv) > 2: #Port given
+        PORT = int(sys.argv[2])
 
     server = Server(HOST_NAME, PORT)
     
